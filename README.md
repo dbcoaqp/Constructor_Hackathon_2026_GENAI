@@ -13,5 +13,5 @@ We did not rely on the 3D engines. We deconstructed the camera's intrinsic param
 ## Hightlight 3: Ready for High-Frequency Sensor Fusion
 The current architecture is already running successfully based on 9-dimensional state tensor. Its fully ready to connect to 20Hz Badenia brake disc temperature and 250Hz Kistler slip angle for predicting tire grip limits.
 
-TODO
+## TODO
 Refactor file ingestion pipeline to support dynamic CLI arguments via argparse for batch processing.
