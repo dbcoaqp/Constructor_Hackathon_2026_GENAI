@@ -9,7 +9,7 @@ import cv2
 from scipy.spatial.transform import Rotation as R
 
 
-
+# extract datasets from mcap files
 def rip_trajectory(mcap_file_path, target_topic):
     print(f"parsing pairs from {mcap_file_path} ...")
     trajectory = []
@@ -37,7 +37,7 @@ def rip_trajectory(mcap_file_path, target_topic):
     print(f"Parsing complete! Have {len(trajectory)} pairs\n")
     return np.array(trajectory)
 
-
+# extract boundary from track
 def load_track_boundaries(json_path):
     print(f"Executing deep parse on {json_path}...")
     try:
@@ -161,7 +161,7 @@ def rip_and_render_video(mcap_file_path, points_3d, camera_matrix, dist_coeffs, 
                     cv2.rectangle(overlay, (20, 20), (450, 180), (0, 0, 0), -1)
                     cv2.addWeighted(overlay, 0.6, frame, 0.4, 0, frame)
                     
-                    cv2.putText(frame, "CONSTRUCTOR GENAI AGENT - ALPHA", (40, 60), 
+                    cv2.putText(frame, "GENAI AGENT", (40, 60), 
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 200, 0), 2)
                     cv2.putText(frame, f"SPEED : {stu_v_kmh:>5.1f} KM/H", (40, 100), 
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)

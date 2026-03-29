@@ -75,7 +75,7 @@ plt.legend(loc="upper right")
 plt.grid(True, linestyle='--', alpha=0.5)
 
 
-
+# Parameters are get from camera_fl_info.yaml
 camera_matrix = np.array([
     [2555.26339, 0.0,        751.52582],
     [0.0,        2538.42728, 469.37862],
