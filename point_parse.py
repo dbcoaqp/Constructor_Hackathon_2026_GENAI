@@ -39,9 +39,6 @@ speed_delta_kmh = (student_data[:, 3] - optimal_velocity) * 3.6
 early_brake_mask = (optimal_brake < 0.1) & (student_data[:, 5] > 0.4)
 early_brake_points = spatial_student[early_brake_mask]
 
-plt.figure(figsize=(14, 11), facecolor='#111111') 
-ax = plt.gca()
-ax.set_facecolor('#111111')
 
 plt.figure(figsize=(12, 10))
 plt.scatter(coach_data[:, 0], coach_data[:, 1], c='lime', s=1, label='Optimal Racing Line (Coach)')
