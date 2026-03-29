@@ -172,7 +172,7 @@ def rip_and_render_video(mcap_file_path, points_3d, camera_matrix, dist_coeffs, 
                     
 
                     out_video.write(frame)
-                    cv2.imshow("Agent AR HUD - Hackathon Alpha", frame)
+                    cv2.imshow("Agent AR HUD - Hackathon", frame)
                     frame_idx += 1
                     
                     if cv2.waitKey(1) & 0xFF == ord('q'):
