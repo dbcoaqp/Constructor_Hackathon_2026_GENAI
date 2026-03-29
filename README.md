@@ -4,6 +4,11 @@
 
 ---
 
+## Authors
+Boburjon Radjapov
+Yiheng Cao
+Giorgi Trapaidze
+
 ## Repository structure
 
 ```
@@ -161,14 +166,6 @@ Place these in the project root (not included in the repo due to size):
 ```bash
 pip install foxglove-sdk mcap-ros2-support scipy opencv-python pyyaml numpy
 ```
-
----
-
-## TODO
-
-- [ ] Refactor file ingestion pipeline to support dynamic CLI arguments via `argparse` for batch processing
-- [ ] Connect Badenia (20 Hz) and Kistler (250 Hz) sensor streams into the 9D state tensor for live grip limit prediction
-- [ ] Export lap-over-lap improvement metrics and mistake heatmaps as structured reports
 
 ---
 
