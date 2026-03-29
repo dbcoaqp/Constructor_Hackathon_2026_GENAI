@@ -5,9 +5,9 @@
 ---
 
 ## Authors
-Boburjon Radjapov__
-Yiheng Cao__
-Giorgi Trapaidze
+Boburjon Radjapov<br />
+Yiheng Cao__<br />
+Giorgi Trapaidze<br />
 
 ## Repository structure
 
