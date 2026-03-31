@@ -4,6 +4,12 @@
 
 ---
 
+## Yas Marina Circuit - Spatial Anchoring
+![Yas Marina Circuit - Spatial Anchoring](Yas Marina Circuit - Spatial Anchoring.png)
+
+## Video demo
+![Video](Hachathon_github.gif)
+
 ## Authors
 Boburjon Radjapov<br />
 Yiheng Cao<br />
