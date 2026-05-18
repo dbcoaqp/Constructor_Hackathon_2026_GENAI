@@ -84,26 +84,35 @@ def extract_from_mcap(file_name, target_topic):
 
 
 def rip_and_render_video(mcap_file_path, points_3d, camera_matrix, dist_coeffs, student_data, early_brake_points):
+    """
+    Reads an MCAP file containing camera data, projects 3D points onto the 2D image plane,
+    and renders an augmented reality (AR) HUD with telemetry data.
+    """
     print(f"[Agent Vision] Online. Syncing telemetry & video from {mcap_file_path}...")
     cam_topic = "/constructor0/sensor/camera_fl/compressed_image"
     
     frame_idx = 0
     max_state_idx = len(student_data) - 1
     
+    # Initialize video writer with codec and resolution
     fourcc = cv2.VideoWriter_fourcc(*'avc1')
     out_video = cv2.VideoWriter("Agent_Final_Lap.mp4", fourcc, 10.0, (1506, 728))
 
+    # Open and iterate through MCAP file messages
     with open(mcap_file_path, "rb") as f:
         for msg in read_ros2_messages(f):
             if msg.channel.topic == cam_topic:
+                # Decode compressed image data
                 raw_data = msg.ros_msg.data
                 np_arr = np.frombuffer(raw_data, np.uint8)
                 frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
                 
                 if frame is not None:
+                    # Sync telemetry state with current frame index
                     state_idx = min(frame_idx * 10, max_state_idx)
                     current_state = student_data[state_idx]
                     
+                    # Extract telemetry data
                     stu_pos = current_state[0:3]   
                     stu_rpy = current_state[6:9]   
                     stu_v_kmh = current_state[3] * 3.6
@@ -111,10 +120,12 @@ def rip_and_render_video(mcap_file_path, points_3d, camera_matrix, dist_coeffs, 
                     stu_brake = current_state[5] * 100.0
                     stu_brake_bar = current_state[5] / 100000.0
                     
+                    # Calculate camera pose in world coordinates
                     rot_car = R.from_euler('xyz', stu_rpy, degrees=False) 
                     cam_offset = np.array([1.5, 0.3, 1.0])
                     cam_pos_world = stu_pos + rot_car.apply(cam_offset)
 
+                    # Define transformation from optical frame to car frame
                     dcm_optical_to_car = np.array([
                         [ 0.0,  0.0,  1.0], 
                         [-1.0,  0.0,  0.0], 
@@ -124,10 +135,12 @@ def rip_and_render_video(mcap_file_path, points_3d, camera_matrix, dist_coeffs, 
                     rot_optical = R.from_matrix(dcm_optical_to_car)
                     rot_cam_world = rot_car * rot_optical
                     
+                    # Calculate view matrix (inverse of camera pose)
                     rot_view = rot_cam_world.inv()
                     tvec = rot_view.apply(-cam_pos_world).reshape(3, 1)
                     rvec = rot_view.as_rotvec().reshape(3, 1)
 
+                    # Project 3D points to 2D image plane
                     points_cam = rot_view.apply(points_3d - cam_pos_world)
                     front_mask = (points_cam[:, 2] > 2.0) & (points_cam[:, 2] < 80.0) 
                     visible_points_3d = points_3d[front_mask]
@@ -136,15 +149,18 @@ def rip_and_render_video(mcap_file_path, points_3d, camera_matrix, dist_coeffs, 
                         img_pts, _ = cv2.projectPoints(visible_points_3d, rvec, tvec, camera_matrix, dist_coeffs)
                         img_pts = img_pts.squeeze().reshape(-1, 2)
                         
+                        # Filter points within image bounds
                         height, width = 728, 1506
                         v_mask = (img_pts[:, 0] >= 0) & (img_pts[:, 0] < width) & \
                                  (img_pts[:, 1] >= 0) & (img_pts[:, 1] < height)
                         valid_pts = img_pts[v_mask].astype(int)
                         
+                        # Draw projected points
                         for pt in valid_pts:
                             cv2.circle(frame, tuple(pt), radius=3, color=(0, 255, 0), thickness=-1)
 
                     
+                    # Handle early braking warnings
                     warning_triggered = False
 
                     if len(early_brake_points) > 0:
@@ -157,6 +173,7 @@ def rip_and_render_video(mcap_file_path, points_3d, camera_matrix, dist_coeffs, 
                         if np.any(close_danger_mask):
                             warning_triggered = True
 
+                        # Draw warning points
                         if len(vis_eb_3d) > 0:
                             eb_img_pts, _ = cv2.projectPoints(vis_eb_3d, rvec, tvec, camera_matrix, dist_coeffs)
                             eb_img_pts = eb_img_pts.squeeze().reshape(-1, 2)
@@ -172,10 +189,12 @@ def rip_and_render_video(mcap_file_path, points_3d, camera_matrix, dist_coeffs, 
                             cv2.putText(frame, "!!! EARLY BRAKING DETECTED !!!", (450, 350), 
                                     cv2.FONT_HERSHEY_DUPLEX, 1.2, (0, 0, 255), 3)
                     
+                    # Draw HUD overlay
                     overlay = frame.copy()
                     cv2.rectangle(overlay, (20, 20), (450, 180), (0, 0, 0), -1)
                     cv2.addWeighted(overlay, 0.6, frame, 0.4, 0, frame)
                     
+                    # Add telemetry text
                     cv2.putText(frame, "GENAI AGENT", (40, 60), 
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 200, 0), 2)
                     cv2.putText(frame, f"SPEED : {stu_v_kmh:>5.1f} KM/H", (40, 100), 
@@ -186,13 +205,16 @@ def rip_and_render_video(mcap_file_path, points_3d, camera_matrix, dist_coeffs, 
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255) if stu_brake_bar>2.0 else (255,255,255), 2)
                     
 
+                    # Write frame to video and display
                     out_video.write(frame)
                     cv2.imshow("Agent AR HUD - Hackathon", frame)
                     frame_idx += 1
                     
+                    # Exit on 'q' key
                     if cv2.waitKey(1) & 0xFF == ord('q'):
                         break
                         
+    # Cleanup resources
     cv2.destroyAllWindows()
     out_video.release()
     print("Video stream ended and successfully saved to Agent_Final_Lap.mp4")
