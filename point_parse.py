@@ -17,10 +17,10 @@ coach_file = "hachathon_fast_laps.npy"
 student_file = "hachathon_good_lap.npy"
 wheel_to_wheel = "hachathon_wheel_to_wheel.npy"
 
-coach_data = extract_from_mcap("hackathon_fast_laps.mcap", "/constructor0/state_estimation")
-print("The shape of coach data: ", coach_data.shape) 
-
-student_data = extract_from_mcap("hackathon_good_lap.mcap", "/constructor0/state_estimation")
+coach_data = extract_from_mcap("hackathon_fast_laps.npy", "/constructor0/state_estimation")                       
+print("The shape of coach data: ", coach_data.shape)                            
+                                                                                
+student_data = extract_from_mcap("hackathon_good_lap.npy", "/constructor0/state_estimation")                      
 print("The shape of student data: ", student_data.shape) 
 
 spatial_coach = coach_data[:, :2]

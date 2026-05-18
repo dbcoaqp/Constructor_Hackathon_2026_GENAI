@@ -54,17 +54,32 @@ def load_track_boundaries(json_path):
         return np.array([]), np.array([])
     
 
-def extract_from_mcap(file_name, target_topic):
-    name = file_name[:-5] + ".npy"
-    if os.path.exists(name):
-        print(f"Have {name}, load data from {name}")
-        data = np.load(name)
-        return data
-    else:
-        print(f"No {name}")
-        data = rip_trajectory(file_name, target_topic)
-        np.save(name, data)
-        print(f"Data are saved into {name}!\n")
+
+def extract_from_mcap(file_name, target_topic):                                 
+    # 1. Determine the expected .npy filename                                   
+    # If the input is already .npy, use it. If it's .mcap, swap the extension.  
+    if file_name.endswith(".npy"):                                              
+        npy_name = file_name                                                    
+        mcap_name = file_name[:-4] + ".mcap" # Guess the mcap name if needed    
+    else:                                                                       
+        npy_name = file_name[:-5] + ".npy"                                      
+        mcap_name = file_name                                                   
+                                                                                
+    # 2. Check if the .npy file exists                                          
+    if os.path.exists(npy_name):                                                
+        print(f"Have {npy_name}, load data from {npy_name}")                    
+        data = np.load(npy_name)                                                
+        return data                                                             
+                                                                                
+    # 3. If .npy not found, parse the .mcap file                                
+    else:                                                                       
+        print(f"No {npy_name} found. Parsing {mcap_name}...")                   
+        if not os.path.exists(mcap_name):                                       
+            raise FileNotFoundError(f"Could not find {mcap_name} to parse.")    
+                                                                                
+        data = rip_trajectory(mcap_name, target_topic)                          
+        np.save(npy_name, data)                                                 
+        print(f"Data saved into {npy_name}!\n")                                 
         return data
 
 
